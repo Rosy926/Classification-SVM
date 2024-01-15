@@ -1,0 +1,83 @@
+import pandas as pd
+#import pandas
+import numpy as np
+
+
+url='/diabetes.csv'
+dataset = pd.read_csv(url)
+print(dataset)
+
+
+
+Label=dataset['Outcome']
+
+Data=dataset.drop(['Outcome'],axis=1)
+
+dataset['Outcome'].value_counts()
+
+
+
+
+###Classification
+
+"""Devision de la base de données en 2/3 et 1/3"""
+from sklearn.model_selection import train_test_split
+x_train1,x_test1,train_label,test_label=train_test_split(Data, Label,test_size = 0.33,random_state=0)
+
+
+
+from sklearn import svm
+
+clf=svm.SVC(kernel='linear',C=1)
+clf.fit(x_train1,train_label) #Etape de train 
+y_pred_test = clf.predict(x_test1) #Etape de test
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import confusion_matrix
+
+Acc=accuracy_score(test_label,y_pred_test)*100
+
+fpr, tpr, thresholds = roc_curve(test_label, y_pred_test, pos_label=1)
+
+AUC=auc(fpr, tpr)*100
+print(AUC)
+
+"""roc curve"""
+import matplotlib.pyplot as plt
+plt.plot(fpr, tpr, color='blue',label = 'AUC = %0.2f' % AUC)
+plt.title('Receiver Operating Characteristic')
+#plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % AUC)
+plt.legend(loc = 'lower right')
+plt.plot([0, 1], [0, 1],'r--')
+plt.xlim([0, 1])
+plt.ylim([0, 1])
+plt.ylabel('True Positive Rate')
+plt.xlabel('False Positive Rate')
+plt.show()
+
+
+CM = confusion_matrix(test_label, y_pred_test)
+print(CM)
+
+from sklearn.metrics import classification_report
+print(classification_report(test_label, y_pred_test))
+
+
+"""Visualizing Confusion Matrix using Heatmap"""
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+class_names=[0,1] # name  of classes
+fig, ax = plt.subplots()
+tick_marks = np.arange(len(class_names))
+plt.xticks(tick_marks, class_names)
+plt.yticks(tick_marks, class_names)
+# create heatmap
+sns.heatmap(pd.DataFrame(CM), annot=True, cmap="YlGnBu" ,fmt='g')
+ax.xaxis.set_label_position("top")
+plt.tight_layout()
+plt.title('Confusion matrix', y=1.1)
+plt.ylabel('Actual label')
+plt.xlabel('Predicted label')
+
+
